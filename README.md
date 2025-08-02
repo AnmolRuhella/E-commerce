@@ -73,11 +73,15 @@ Delete
 Click "Delete" on any product to remove it.
 
 Setup Instructions
+
 git clone https://github.com/AnmolRuhella/E-commerce.git
 Install dependencies: npm install
 Add your .env file: to the root of the project 
-MONGODB_URI=your_mongodb_connection
-JWT_SECRET=your_jwt_secret
+
+MONGO_URI=mongodb+srv://anmolruhella23:VVj0KKWESZWJbyVW@ecommerceuser.j6gh5ib.mongodb.net/?retryWrites=true&w=majority&appName=EcommerceUser
+
+JWT_SECRET=your-secret-key
+
 
 
  
