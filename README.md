@@ -1,36 +1,83 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+This is a full-stack app built using Next.js, TypeScript, TailwindCSS, and MongoDB.
+It allows users to register/login, then create, read, update, and delete products.
 
-## Getting Started
+Features
+User Login & Registration
+Protected Layout for authenticated users
+Product CRUD (Add / Edit / Delete / View)
+Filter products by Category & Price
+Token-based Auth using JWT
+State managed using React hooks (Redux optional)
 
-First, run the development server:
+Authentication Flow
+User can register or login.
+After successful login:
+A JWT token is returned by the API.
+Token is stored in localStorage.
+When the user logs out:
+Token is removed from localStorage.
+Protected routes/layouts check if a valid token is present
+set up the global http service thats always sent the  bearer token in the request - request interceptor
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Folder Structure 
+/app
+  /products         ← Product listing UI + dialog form
+  /auth             ← Login/Register pages
+  /coming-soon      ← Placeholder for future features
+/models
+  /Product.ts       ← Mongoose model for product
+  /User.ts          ← Mongoose model for user
+/lib
+  /db.ts            ← MongoDB connection helper
+  /httpService.ts   ← Axios instance with token injection
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Product API Endpoints
+GET /api/products
+Returns a list of products.
+Supports filters:?category=electronics?price=1000-5000
 
-## Learn More
+POST /api/products
+Add a new product.
 
-To learn more about Next.js, take a look at the following resources:
+Body example: {
+  "name": "iPhone 15",
+  "price": 120000,
+  "category": "mobile",
+  "inStock": true
+}
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+PUT /api/products/:id
+Update an existing product.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+DELETE /api/products/:id
+Delete a product by its ID.
 
-## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+ Product Page Functionality
+All products are shown in card format.
+You can filter them using dropdowns for category and price.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Add
+Click “Add Product” to open a dialog.
+Fill out the form and submit.
+New product will appear instantly.
+
+Edit
+Click "Edit" on a product card.
+The same form opens with pre-filled values.
+Update the values and hit “Update”.
+
+Delete
+Click "Delete" on any product to remove it.
+
+Setup Instructions
+git clone https://github.com/your-username/your-repo.git
+Install dependencies: npm install
+Add your .env file: to the root of the project 
+MONGODB_URI=your_mongodb_connection
+JWT_SECRET=your_jwt_secret
+
+
+ 

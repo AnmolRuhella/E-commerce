@@ -26,7 +26,7 @@ export default function Sidebar() {
           Products
         </button>
         <button
-          onClick={() => handleNavigate('/settings')}
+          onClick={() => handleNavigate('/setting')}
           className="text-left text-black font-medium hover:text-blue-600 transition"
         >
           Settings
