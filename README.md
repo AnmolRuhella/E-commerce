@@ -73,7 +73,7 @@ Delete
 Click "Delete" on any product to remove it.
 
 Setup Instructions
-git clone https://github.com/your-username/your-repo.git
+git clone https://github.com/AnmolRuhella/E-commerce.git
 Install dependencies: npm install
 Add your .env file: to the root of the project 
 MONGODB_URI=your_mongodb_connection
