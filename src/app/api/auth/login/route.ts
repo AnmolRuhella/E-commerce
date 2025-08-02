@@ -1,34 +1,33 @@
-import { NextResponse } from 'next/server';
+import  {connectToDB}  from '../../../../lib/db';
+import User from '@/models/User/User';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { serialize } from 'cookie';
-import User from '@/models/User/User';
-import { connectToDB } from '@/lib/db';
+import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
-  await connectToDB();
-  const { email, password } = await req.json();
-  const user = await User.findOne({ email });
+  try {
+    await connectToDB();
 
-  if (!user || !(await bcrypt.compare(password, user.password))) {
-    return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
+    const { email, password } = await req.json();
+    if (!email || !password) {
+      return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
+    }
+
+    const authtoken = jwt.sign({ id: user._id }, process.env.JWT_SECRET!, { expiresIn: '1h' });
+
+    return NextResponse.json({ authtoken }, { status: 200 });
+  } catch (err) {
+    console.error('Login error:', err);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-
-  const token = jwt.sign(
-    { id: user._id, isAdmin: user.isAdmin },
-    process.env.JWT_SECRET!,
-    { expiresIn: '1h' }
-  );
-
-  const cookieSerialized = serialize('authToken', token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-    path: '/',
-    maxAge: 3600, // 1 hour
-  });
-
-  const res = NextResponse.json({ message: 'Login successful' });
-  res.headers.set('Set-Cookie', cookieSerialized);
-  return res;
 }
