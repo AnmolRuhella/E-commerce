@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import axios from 'axios';
-import { toast } from 'sonner';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import axios from "axios";
+import { toast } from "sonner";
 
 import {
   Card,
@@ -11,29 +11,30 @@ import {
   CardHeader,
   CardFooter,
   CardTitle,
-} from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "../../components/ui/button";
+import { Label } from "@/components/ui/label";
 
 export default function LoginCard() {
   const [isSignup, setIsSignup] = useState(false);
-  const [email, setEmail] = useState('');
-  const [userName, setUserName] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [userName, setUserName] = useState("");
+  const [password, setPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
   const validateForm = () => {
     if (!email || !password || (isSignup && !userName)) {
-      toast.error('Please fill all required fields.');
+      toast.error("Please fill all required fields.");
       return false;
     }
-    if (!email.includes('@')) {
-      toast.warning('Please enter a valid email address.');
+    if (!email.includes("@")) {
+      toast.warning("Please enter a valid email address.");
       return false;
     }
     if (password.length < 6) {
-      toast.warning('Password must be at least 6 characters.');
+      toast.warning("Password must be at least 6 characters.");
       return false;
     }
     return true;
@@ -44,38 +45,45 @@ export default function LoginCard() {
 
     if (!validateForm()) return;
 
+    setIsSubmitting(true); // disable button after first click
+
     try {
       if (isSignup) {
-        const response = await axios.post('/api/auth/register', {
+        const response = await axios.post("/api/auth/register", {
           email,
           userName,
           password,
         });
-        toast.success(response.data.message || 'Registered successfully');
+        toast.success(
+          response.data.message ||
+            "User registered successfully! You can now log in."
+        );
         setIsSignup(false);
-        setUserName('');
-        setEmail('');
-        setPassword('');
+        setUserName("");
+        setEmail("");
+        setPassword("");
       } else {
-        const response = await axios.post('/api/auth/login', {
+        const response = await axios.post("/api/auth/login", {
           email,
           password,
         });
-        toast.success(response.data.message || 'Logged in successfully');
+        toast.success(response.data.message || "Logged in successfully");
         const token = response.data.authtoken;
 
         if (token) {
-          localStorage.setItem('token', token);
-          router.push('/dashboard');
+          localStorage.setItem("token", token);
+          router.push("/dashboard");
         }
       }
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        toast.error(err.response?.data?.error || 'Something went wrong');
+        toast.error(err.response?.data?.error || "Something went wrong");
       } else {
-        console.error('Unexpected error:', err);
-        toast.error('Unexpected error occurred');
+        console.error("Unexpected error:", err);
+        toast.error("Unexpected error occurred");
       }
+    } finally {
+      setIsSubmitting(false); // re-enable button (optional, or remove if you don't want it clickable again)
     }
   };
 
@@ -85,7 +93,7 @@ export default function LoginCard() {
         <form onSubmit={handleSubmit}>
           <CardHeader>
             <CardTitle className="text-2xl text-center">
-              {isSignup ? 'Sign Up' : 'Login'}
+              {isSignup ? "Sign Up" : "Login"}
             </CardTitle>
           </CardHeader>
 
@@ -129,19 +137,24 @@ export default function LoginCard() {
             </div>
           </CardContent>
 
-          <CardFooter className="flex flex-col gap-3 mt-4">
-            <Button type="submit" className="w-full bg-blue-900">
-              {isSignup ? 'Register' : 'Login'}
+          <CardFooter className="flex flex-col gap-3 mt-5">
+            <Button
+              type="submit"
+              className="w-full bg-blue-900"
+              disabled={isSubmitting}
+            >
+              {isSignup ? "Register" : "Login"}
             </Button>
-
             <p className="text-sm text-gray-300 text-center">
-              {isSignup ? 'Already have an account?' : "Don't have an account?"}{' '}
+              {isSignup
+                ? "Already have an account? "
+                : "Don't have an account? "}
               <button
                 type="button"
                 onClick={() => setIsSignup(!isSignup)}
-                className="text-blue-400 hover:underline font-medium"
+                className="text-blue-400 hover:underline font-medium inline p-0 m-0 bg-transparent"
               >
-                {isSignup ? 'Login' : 'Register'}
+                {isSignup ? "Login" : "Register"}
               </button>
             </p>
           </CardFooter>
