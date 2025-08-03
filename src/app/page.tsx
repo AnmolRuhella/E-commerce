@@ -1,6 +1,6 @@
 import NonProtectedLayout from './layout/NonProtectedLayout';
 import LoginCard from './component/LoginCard'
-export default function Login() {
+export default function Home() {
   return (
     <NonProtectedLayout>
       <LoginCard />

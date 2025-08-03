@@ -115,12 +115,13 @@ export default function ProductPage() {
   const uniqueCategories = Array.from(new Set(products.map((p) => p.category)));
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 bg-black min-h-screen text-white">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold tracking-tight">Product List</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-white">Product List</h1>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button
+              variant="default"
               onClick={() => {
                 setEditingProduct(null);
                 setFormData({
@@ -135,7 +136,7 @@ export default function ProductPage() {
               Add Product
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="bg-zinc-900 border border-zinc-700 text-white">
             <div className="space-y-4">
               <h2 className="text-lg font-semibold">
                 {editingProduct ? "Edit Product" : "Add Product"}
@@ -143,6 +144,7 @@ export default function ProductPage() {
               <div className="grid gap-2">
                 <Label>Name</Label>
                 <Input
+                  className="bg-zinc-800 text-white"
                   name="name"
                   value={formData.name}
                   onChange={handleFormChange}
@@ -151,6 +153,7 @@ export default function ProductPage() {
               <div className="grid gap-2">
                 <Label>Price</Label>
                 <Input
+                  className="bg-zinc-800 text-white"
                   type="number"
                   name="price"
                   value={formData.price}
@@ -160,6 +163,7 @@ export default function ProductPage() {
               <div className="grid gap-2">
                 <Label>Category</Label>
                 <Input
+                  className="bg-zinc-800 text-white"
                   name="category"
                   value={formData.category}
                   onChange={handleFormChange}
@@ -172,11 +176,12 @@ export default function ProductPage() {
                   name="inStock"
                   checked={formData.inStock}
                   onChange={handleFormChange}
+                  className="accent-blue-600"
                 />
                 <Label htmlFor="inStock">In Stock</Label>
               </div>
 
-              <Button onClick={handleFormSubmit}>
+              <Button onClick={handleFormSubmit} className="w-full">
                 {editingProduct ? "Update" : "Create"}
               </Button>
             </div>
@@ -187,7 +192,7 @@ export default function ProductPage() {
       {/* Filters */}
       <div className="flex flex-wrap gap-4 items-center">
         <select
-          className="border rounded px-3 py-2 text-sm"
+          className="bg-zinc-900 border border-zinc-700 rounded px-3 py-2 text-sm text-white"
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
         >
@@ -200,7 +205,7 @@ export default function ProductPage() {
         </select>
 
         <select
-          className="border rounded px-3 py-2 text-sm"
+          className="bg-zinc-900 border border-zinc-700 rounded px-3 py-2 text-sm text-white"
           value={selectedPrice}
           onChange={(e) => setSelectedPrice(e.target.value)}
         >
@@ -214,12 +219,15 @@ export default function ProductPage() {
       {/* Product Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {products.map((product) => (
-          <Card key={product._id} className="hover:shadow-lg transition-shadow">
+          <Card
+            key={product._id}
+            className="bg-zinc-900 text-white border border-zinc-700 hover:shadow-lg transition-shadow"
+          >
             <CardHeader>
               <CardTitle className="text-xl">{product.name}</CardTitle>
-              <CardDescription className="text-sm text-muted-foreground">
+              <CardDescription className="text-sm text-zinc-400">
                 Category:{" "}
-                <span className="font-medium text-black">
+                <span className="font-medium text-white">
                   {product.category}
                 </span>
               </CardDescription>
@@ -229,7 +237,10 @@ export default function ProductPage() {
                 <span className="font-semibold">Price:</span> ₹{product.price}
               </p>
               <div>
-                <Badge variant={product.inStock ? "default" : "destructive"}>
+                <Badge
+                  variant={product.inStock ? "default" : "destructive"}
+                  className="text-sm"
+                >
                   {product.inStock ? "In Stock" : "Out of Stock"}
                 </Badge>
               </div>

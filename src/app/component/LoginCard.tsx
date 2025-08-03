@@ -1,8 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import axios from 'axios';
+
+import { Card, CardContent, CardHeader, CardFooter, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 
 export default function LoginCard() {
   const [isSignup, setIsSignup] = useState(false);
@@ -18,23 +23,14 @@ export default function LoginCard() {
 
     try {
       if (isSignup) {
-        await axios.post('/api/auth/register', {
-          email,
-          userName,
-          password,
-        });
-
+        await axios.post('/api/auth/register', { email, userName, password });
         alert('Registration successful! You can now log in.');
         setIsSignup(false);
         setUserName('');
         setEmail('');
         setPassword('');
       } else {
-        const response = await axios.post('/api/auth/login', {
-          email,
-          password,
-        });
-
+        const response = await axios.post('/api/auth/login', { email, password });
         const token = response.data.authtoken;
 
         if (token) {
@@ -54,66 +50,77 @@ export default function LoginCard() {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="bg-white p-10 rounded-2xl shadow-lg w-full max-w-md mx-auto mt-20 border border-gray-200"
-    >
-      <h2 className="text-2xl font-bold mb-6 text-center text-black">
-        {isSignup ? 'Sign Up' : 'Login'}
-      </h2>
+    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800 px-4 py-8 sm:py-0">
+      <Card className="w-full max-w-sm sm:max-w-md border-gray-700 bg-gray-900 text-white shadow-xl">
+        <form onSubmit={handleSubmit}>
+          <CardHeader>
+            <CardTitle className="text-2xl text-center">
+              {isSignup ? 'Sign Up' : 'Login'}
+            </CardTitle>
+          </CardHeader>
 
-      {error && (
-        <p className="mb-4 text-red-600 text-sm text-center font-medium">
-          {error}
-        </p>
-      )}
+          <CardContent className="space-y-4">
+            {error && (
+              <p className="text-sm text-red-400 text-center font-medium">{error}</p>
+            )}
 
-      {isSignup && (
-        <input
-          type="text"
-          placeholder="Username"
-          value={userName}
-          onChange={(e) => setUserName(e.target.value)}
-          className="w-full p-3 mb-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
-          required
-        />
-      )}
+            {isSignup && (
+              <div className="space-y-1">
+                <Label htmlFor="username">Username</Label>
+                <Input
+                  id="username"
+                  type="text"
+                  value={userName}
+                  onChange={(e) => setUserName(e.target.value)}
+                  required
+                  className="bg-gray-800 text-white border-gray-700"
+                />
+              </div>
+            )}
 
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        className="w-full p-3 mb-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
-        required
-      />
+            <div className="space-y-1">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="bg-gray-800 text-white border-gray-700"
+              />
+            </div>
 
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        className="w-full p-3 mb-6 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
-        required
-      />
+            <div className="space-y-1">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="bg-gray-800 text-white border-gray-700"
+              />
+            </div>
+          </CardContent>
 
-      <button
-        type="submit"
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition"
-      >
-        {isSignup ? 'Register' : 'Login'}
-      </button>
+          <CardFooter className="flex flex-col gap-3 mt-3">
+            <Button type="submit" className="w-full bg-blue-900">
+              {isSignup ? 'Register' : 'Login'}
+            </Button>
 
-      <p className="text-center mt-5 text-sm font-medium text-black">
-        {isSignup ? 'Already have an account?' : "Don't have an account?"}{' '}
-        <button
-          type="button"
-          onClick={() => setIsSignup(!isSignup)}
-          className="text-blue-600 hover:underline font-semibold"
-        >
-          {isSignup ? 'Login' : 'Register'}
-        </button>
-      </p>
-    </form>
+            <p className="text-sm text-gray-300 text-center">
+              {isSignup ? 'Already have an account?' : "Don't have an account?"}{' '}
+              <button
+                type="button"
+                onClick={() => setIsSignup(!isSignup)}
+                className="text-blue-400 hover:underline font-medium"
+              >
+                {isSignup ? 'Login' : 'Register'}
+              </button>
+            </p>
+          </CardFooter>
+        </form>
+      </Card>
+    </div>
   );
 }
