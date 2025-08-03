@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import axiosInstance from "@/lib/httpService";
+import { toast } from "sonner";
+
 import {
   Card,
   CardContent,
@@ -43,9 +45,16 @@ export default function ProductPage() {
       if (selectedCategory) params.append("category", selectedCategory);
       if (selectedPrice) params.append("price", selectedPrice);
       const res = await axiosInstance.get(`/products?${params.toString()}`);
-      setProducts(res.data);
+
+      if (res.data.success && Array.isArray(res.data.products)) {
+        setProducts(res.data.products);
+      } else {
+        setProducts([]);
+        toast.error(res.data.error || "Failed to load products");
+      }
     } catch (err) {
-      console.error("Failed to fetch products:", err);
+      console.error("Fetch failed:", err);
+      toast.error("Failed to fetch products");
     }
   };
 
@@ -55,10 +64,12 @@ export default function ProductPage() {
 
   const handleDelete = async (id: string) => {
     try {
-      await axiosInstance.delete(`/products/${id}`);
+      const res = await axiosInstance.delete(`/products/${id}`);
+      toast.success(res.data.message || "Deleted successfully");
       fetchProducts();
     } catch (err) {
       console.error("Delete failed:", err);
+      toast.error("Failed to delete product");
     }
   };
 
@@ -76,13 +87,11 @@ export default function ProductPage() {
   const handleFormChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
-    const target = e.target as HTMLInputElement | HTMLSelectElement;
+    const target = e.target;
     const { name, value, type } = target;
-
     setFormData((prev) => ({
       ...prev,
-      [name]:
-        type === "checkbox" ? (target as HTMLInputElement).checked : value,
+      [name]: type === "checkbox" ? (target as HTMLInputElement).checked : value,
     }));
   };
 
@@ -94,10 +103,13 @@ export default function ProductPage() {
 
     try {
       if (editingProduct) {
-        await axiosInstance.put(`/products/${editingProduct._id}`, payload);
+        const res = await axiosInstance.put(`/products/${editingProduct._id}`, payload);
+        toast.success(res.data.message || "Product updated");
       } else {
-        await axiosInstance.post("/products", payload);
+        const res = await axiosInstance.post("/products", payload);
+        toast.success(res.data.message || "Product created");
       }
+
       setOpen(false);
       setEditingProduct(null);
       setFormData({
@@ -109,6 +121,7 @@ export default function ProductPage() {
       fetchProducts();
     } catch (err) {
       console.error("Save failed:", err);
+      toast.error("Failed to save product");
     }
   };
 
@@ -181,7 +194,7 @@ export default function ProductPage() {
                 <Label htmlFor="inStock">In Stock</Label>
               </div>
 
-              <Button onClick={handleFormSubmit} className="w-full">
+              <Button onClick={handleFormSubmit} className="w-full bg-blue-900">
                 {editingProduct ? "Update" : "Create"}
               </Button>
             </div>

@@ -12,6 +12,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import axios from 'axios';
+import { toast } from 'sonner';
 
 type Props = {
   onProductAdded: () => void;
@@ -42,7 +44,11 @@ export default function AddProduct({ onProductAdded }: Props) {
       setForm({ name: '', price: '', category: '', inStock: true });
       setOpen(false);
     } catch (err) {
-      console.error('Failed to add product', err);
+      if (axios.isAxiosError(err)) {
+        toast.error(err.response?.data?.error || 'Something went wrong');
+      } else {
+        toast.error('An unexpected error occurred');
+      }
     }
   };
 

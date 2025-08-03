@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(req: NextRequest) {
   try {
     await connectToDB();
+
     const { searchParams } = new URL(req.url);
     const category = searchParams.get('category');
     const priceRange = searchParams.get('price');
@@ -17,19 +18,53 @@ export async function GET(req: NextRequest) {
     }
 
     const products = await Product.find(query);
-    return NextResponse.json(products);
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: 'Products fetched successfully.',
+        products,
+      },
+      { status: 200 }
+    );
   } catch (err) {
-    return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 });
+    console.error('Fetch error:', err);
+    return NextResponse.json(
+      { success: false, error: 'Failed to fetch products.' },
+      { status: 500 }
+    );
   }
 }
 
 export async function POST(req: Request) {
   try {
     await connectToDB();
+
     const body = await req.json();
-    const product = await Product.create(body);
-    return NextResponse.json(product);
+    const { name, price, category, inStock } = body;
+
+    if (!name || price === undefined || !category || inStock === undefined) {
+      return NextResponse.json(
+        { success: false, error: 'All product fields are required.' },
+        { status: 400 }
+      );
+    }
+
+    const product = await Product.create({ name, price, category, inStock });
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: 'Product added successfully.',
+        product,
+      },
+      { status: 201 }
+    );
   } catch (err) {
-    return NextResponse.json({ error: 'Failed to add product' }, { status: 500 });
+    console.error('Product creation error:', err);
+    return NextResponse.json(
+      { success: false, error: 'Failed to add product.' },
+      { status: 500 }
+    );
   }
 }

@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 export default function Header() {
   const router = useRouter();
@@ -17,7 +18,8 @@ export default function Header() {
   const handleLogout = () => {
     localStorage.removeItem('token');
     router.push('/login');
-    setIsMenuOpen(false); // Close mobile menu on logout
+    setIsMenuOpen(false); 
+     toast.success('Logged out sucessfully');
   };
 
   return (

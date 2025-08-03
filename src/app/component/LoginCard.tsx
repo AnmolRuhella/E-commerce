@@ -3,8 +3,15 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
+import { toast } from 'sonner';
 
-import { Card, CardContent, CardHeader, CardFooter, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardFooter,
+  CardTitle,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -17,34 +24,59 @@ export default function LoginCard() {
   const [error, setError] = useState('');
   const router = useRouter();
 
+  const validateForm = () => {
+    if (!email || !password || (isSignup && !userName)) {
+      toast.error('Please fill all required fields.');
+      return false;
+    }
+    if (!email.includes('@')) {
+      toast.warning('Please enter a valid email address.');
+      return false;
+    }
+    if (password.length < 6) {
+      toast.warning('Password must be at least 6 characters.');
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
+    if (!validateForm()) return;
+
     try {
       if (isSignup) {
-        await axios.post('/api/auth/register', { email, userName, password });
-        alert('Registration successful! You can now log in.');
+        const response = await axios.post('/api/auth/register', {
+          email,
+          userName,
+          password,
+        });
+        toast.success(response.data.message || 'Registered successfully');
         setIsSignup(false);
         setUserName('');
         setEmail('');
         setPassword('');
       } else {
-        const response = await axios.post('/api/auth/login', { email, password });
+        const response = await axios.post('/api/auth/login', {
+          email,
+          password,
+        });
+        toast.success(response.data.message || 'Logged in successfully');
         const token = response.data.authtoken;
 
         if (token) {
           localStorage.setItem('token', token);
           router.push('/dashboard');
-        } else {
-          setError('Login failed: Token not received');
         }
       }
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.error || 'Something went wrong');
+        toast.error(err.response?.data?.error || 'Something went wrong');
       } else {
-        setError('An unexpected error occurred');
+        console.error('Unexpected error:', err);
+        toast.error('Unexpected error occurred');
       }
     }
   };
@@ -60,10 +92,6 @@ export default function LoginCard() {
           </CardHeader>
 
           <CardContent className="space-y-4">
-            {error && (
-              <p className="text-sm text-red-400 text-center font-medium">{error}</p>
-            )}
-
             {isSignup && (
               <div className="space-y-1">
                 <Label htmlFor="username">Username</Label>
@@ -103,7 +131,7 @@ export default function LoginCard() {
             </div>
           </CardContent>
 
-          <CardFooter className="flex flex-col gap-3 mt-3">
+          <CardFooter className="flex flex-col gap-3 mt-4">
             <Button type="submit" className="w-full bg-blue-900">
               {isSignup ? 'Register' : 'Login'}
             </Button>
