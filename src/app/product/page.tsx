@@ -240,18 +240,19 @@ const handleFormChange = (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {products.map((product) => (
           <Card key={product._id} className="bg-zinc-900 border border-zinc-700">
-            <CardHeader>
+            <CardHeader className="text-white">
               <CardTitle>{product.name}</CardTitle>
-              <CardDescription className="text-zinc-400">
+              <CardDescription className="text-white">
                 Category: <span className="text-white">{product.category}</span>
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <p>
+              <p className="text-white">
                 <strong>Price:</strong> ₹{product.price}
               </p>
               <Badge
-                variant={product.inStock ? "default" : "destructive"}
+                variant={product.inStock ? "outline" : "destructive"}
+                className="text-white"
               >
                 {product.inStock ? "In Stock" : "Out of Stock"}
               </Badge>
