@@ -2,7 +2,21 @@ import { connectToDB } from '@/lib/db';
 import Product from '@/models/Product/Product';
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+interface ParamsContext {
+  params: {
+    id: string;
+  };
+}
+export async function PUT(req: NextRequest, context: unknown) {
+  if (!isParamsContext(context)) {
+    return NextResponse.json(
+      { success: false, error: 'Invalid context structure.' },
+      { status: 400 }
+    );
+  }
+
+  const { id } = context.params;
+
   try {
     await connectToDB();
     const body = await req.json();
@@ -14,7 +28,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       );
     }
 
-    const updatedProduct = await Product.findByIdAndUpdate(params.id, body, {
+    const updatedProduct = await Product.findByIdAndUpdate(id, body, {
       new: true,
       runValidators: true,
     });
@@ -35,7 +49,6 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       { status: 200 }
     );
   } catch (error) {
-    console.error('Product update error:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to update product.' },
       { status: 500 }
@@ -43,11 +56,20 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(_: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, context: unknown) {
+  if (!isParamsContext(context)) {
+    return NextResponse.json(
+      { success: false, error: 'Invalid context structure.' },
+      { status: 400 }
+    );
+  }
+
+  const { id } = context.params;
+
   try {
     await connectToDB();
 
-    const deletedProduct = await Product.findByIdAndDelete(params.id);
+    const deletedProduct = await Product.findByIdAndDelete(id);
 
     if (!deletedProduct) {
       return NextResponse.json(
@@ -61,10 +83,21 @@ export async function DELETE(_: Request, { params }: { params: { id: string } })
       { status: 200 }
     );
   } catch (error) {
-    console.error('Product delete error:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to delete product.' },
       { status: 500 }
     );
   }
+}
+
+// Safe runtime type check to avoid using `any`
+function isParamsContext(context: unknown): context is ParamsContext {
+  return (
+    typeof context === 'object' &&
+    context !== null &&
+    'params' in context &&
+    typeof (context as Record<string, unknown>).params === 'object' &&
+    (context as { params: { id: unknown } }).params.id !== undefined &&
+    typeof (context as { params: { id: unknown } }).params.id === 'string'
+  );
 }

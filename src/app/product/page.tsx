@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+
 import axiosInstance from "@/lib/httpService";
 import { toast } from "sonner";
 
@@ -39,37 +40,39 @@ export default function ProductPage() {
   });
   const [open, setOpen] = useState(false);
 
-  const fetchProducts = async () => {
-    try {
-      const params = new URLSearchParams();
-      if (selectedCategory) params.append("category", selectedCategory);
-      if (selectedPrice) params.append("price", selectedPrice);
-      const res = await axiosInstance.get(`/products?${params.toString()}`);
+ const fetchProducts = useCallback(async () => {
+  try {
+    const params = new URLSearchParams();
+    if (selectedCategory) params.append("category", selectedCategory);
+    if (selectedPrice) params.append("price", selectedPrice);
 
-      if (res.data.success && Array.isArray(res.data.products)) {
-        setProducts(res.data.products);
-      } else {
-        setProducts([]);
-        toast.error(res.data.error || "Failed to load products");
-      }
-    } catch (err) {
-      console.error("Fetch failed:", err);
-      toast.error("Failed to fetch products");
+    const res = await axiosInstance.get(`/products?${params.toString()}`);
+
+    if (res.data.success) {
+      setProducts(res.data.products || []);
+    } else {
+      toast.error(res.data.error || "Failed to fetch products");
     }
-  };
+  } catch (err) {
+    console.error(err);
+    toast.error("Error fetching products");
+  }
+}, [selectedCategory, selectedPrice]);
 
-  useEffect(() => {
-    fetchProducts();
-  }, [selectedCategory, selectedPrice]);
+
+ useEffect(() => {
+  fetchProducts();
+}, [fetchProducts]);
+
 
   const handleDelete = async (id: string) => {
     try {
       const res = await axiosInstance.delete(`/products/${id}`);
-      toast.success(res.data.message || "Deleted successfully");
+      toast.success(res.data.message || "Product deleted");
       fetchProducts();
     } catch (err) {
-      console.error("Delete failed:", err);
-      toast.error("Failed to delete product");
+      console.error(err);
+      toast.error("Delete failed");
     }
   };
 
@@ -84,16 +87,20 @@ export default function ProductPage() {
     setOpen(true);
   };
 
-  const handleFormChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const target = e.target;
-    const { name, value, type } = target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? (target as HTMLInputElement).checked : value,
-    }));
-  };
+const handleFormChange = (
+  e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+) => {
+  const target = e.target;
+  const { name, value, type } = target;
+
+  setFormData((prev) => ({
+    ...prev,
+    [name]: type === "checkbox" && target instanceof HTMLInputElement
+      ? target.checked
+      : value,
+  }));
+};
+
 
   const handleFormSubmit = async () => {
     const payload = {
@@ -102,11 +109,13 @@ export default function ProductPage() {
     };
 
     try {
+      let res;
+
       if (editingProduct) {
-        const res = await axiosInstance.put(`/products/${editingProduct._id}`, payload);
+        res = await axiosInstance.put(`/products/${editingProduct._id}`, payload);
         toast.success(res.data.message || "Product updated");
       } else {
-        const res = await axiosInstance.post("/products", payload);
+        res = await axiosInstance.post(`/products`, payload);
         toast.success(res.data.message || "Product created");
       }
 
@@ -120,7 +129,7 @@ export default function ProductPage() {
       });
       fetchProducts();
     } catch (err) {
-      console.error("Save failed:", err);
+      console.error(err);
       toast.error("Failed to save product");
     }
   };
@@ -130,11 +139,10 @@ export default function ProductPage() {
   return (
     <div className="p-6 space-y-6 bg-black min-h-screen text-white">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold tracking-tight text-white">Product List</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Product List</h1>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button
-              variant="default"
               onClick={() => {
                 setEditingProduct(null);
                 setFormData({
@@ -157,32 +165,32 @@ export default function ProductPage() {
               <div className="grid gap-2">
                 <Label>Name</Label>
                 <Input
-                  className="bg-zinc-800 text-white"
                   name="name"
                   value={formData.name}
                   onChange={handleFormChange}
+                  className="bg-zinc-800"
                 />
               </div>
               <div className="grid gap-2">
                 <Label>Price</Label>
                 <Input
-                  className="bg-zinc-800 text-white"
                   type="number"
                   name="price"
                   value={formData.price}
                   onChange={handleFormChange}
+                  className="bg-zinc-800"
                 />
               </div>
               <div className="grid gap-2">
                 <Label>Category</Label>
                 <Input
-                  className="bg-zinc-800 text-white"
                   name="category"
                   value={formData.category}
                   onChange={handleFormChange}
+                  className="bg-zinc-800"
                 />
               </div>
-              <div className="flex flex-row items-center gap-2">
+              <div className="flex items-center gap-2">
                 <input
                   type="checkbox"
                   id="inStock"
@@ -193,7 +201,6 @@ export default function ProductPage() {
                 />
                 <Label htmlFor="inStock">In Stock</Label>
               </div>
-
               <Button onClick={handleFormSubmit} className="w-full bg-blue-900">
                 {editingProduct ? "Update" : "Create"}
               </Button>
@@ -205,7 +212,7 @@ export default function ProductPage() {
       {/* Filters */}
       <div className="flex flex-wrap gap-4 items-center">
         <select
-          className="bg-zinc-900 border border-zinc-700 rounded px-3 py-2 text-sm text-white"
+          className="bg-zinc-900 border border-zinc-700 px-3 py-2 rounded text-white"
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
         >
@@ -218,7 +225,7 @@ export default function ProductPage() {
         </select>
 
         <select
-          className="bg-zinc-900 border border-zinc-700 rounded px-3 py-2 text-sm text-white"
+          className="bg-zinc-900 border border-zinc-700 px-3 py-2 rounded text-white"
           value={selectedPrice}
           onChange={(e) => setSelectedPrice(e.target.value)}
         >
@@ -229,34 +236,25 @@ export default function ProductPage() {
         </select>
       </div>
 
-      {/* Product Cards */}
+      {/* Products */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {products.map((product) => (
-          <Card
-            key={product._id}
-            className="bg-zinc-900 text-white border border-zinc-700 hover:shadow-lg transition-shadow"
-          >
+          <Card key={product._id} className="bg-zinc-900 border border-zinc-700">
             <CardHeader>
-              <CardTitle className="text-xl">{product.name}</CardTitle>
-              <CardDescription className="text-sm text-zinc-400">
-                Category:{" "}
-                <span className="font-medium text-white">
-                  {product.category}
-                </span>
+              <CardTitle>{product.name}</CardTitle>
+              <CardDescription className="text-zinc-400">
+                Category: <span className="text-white">{product.category}</span>
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-2">
-              <p className="text-base">
-                <span className="font-semibold">Price:</span> ₹{product.price}
+            <CardContent>
+              <p>
+                <strong>Price:</strong> ₹{product.price}
               </p>
-              <div>
-                <Badge
-                  variant={product.inStock ? "default" : "destructive"}
-                  className="text-sm"
-                >
-                  {product.inStock ? "In Stock" : "Out of Stock"}
-                </Badge>
-              </div>
+              <Badge
+                variant={product.inStock ? "default" : "destructive"}
+              >
+                {product.inStock ? "In Stock" : "Out of Stock"}
+              </Badge>
             </CardContent>
             <CardFooter className="flex justify-end gap-2">
               <Button

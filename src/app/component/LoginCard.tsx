@@ -21,7 +21,6 @@ export default function LoginCard() {
   const [email, setEmail] = useState('');
   const [userName, setUserName] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const router = useRouter();
 
   const validateForm = () => {
@@ -42,7 +41,6 @@ export default function LoginCard() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
 
     if (!validateForm()) return;
 
