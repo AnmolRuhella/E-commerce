@@ -35,7 +35,7 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         success: true,
-        message: 'User registered successfully.',
+        message: 'Registration successful! You can now log in to your account.', 
         user: {
           id: newUser._id,
           email: newUser.email,
