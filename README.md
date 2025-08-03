@@ -76,12 +76,14 @@ Setup Instructions
 
 git clone https://github.com/AnmolRuhella/E-commerce.git
 Install dependencies: npm install
+
 Add your .env file: to the root of the project 
-
 MONGO_URI=mongodb+srv://anmolruhella23:VVj0KKWESZWJbyVW@ecommerceuser.j6gh5ib.mongodb.net/?retryWrites=true&w=majority&appName=EcommerceUser
-
 JWT_SECRET=your-secret-key
+PLease add these both the keys 
 
+add Custom pop-up 
+Add validation 
 
 
  
